@@ -1,0 +1,119 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<base href="<%=basePath%>">
+<title>动态获取新闻</title>
+<style type="text/css">
+select,input {
+	width: 400px;
+	height: 200px;
+	font-size: 50px;
+	text-align-last: center;
+	text-align: center;
+	background-color: pink;
+}
+</style>
+</head>
+<body>
+
+//使用异步的时候需要导入js，根据自己的需求导入
+	<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+
+	<script>
+		var newsid;
+		var ymid;
+		var count;
+
+		function news() {
+			newsid = $('#one option:selected').val();
+		}
+		function ym() {
+			ymid = $('#tow option:selected').val();
+		}
+		function ts() {
+			count = $('#three option:selected').val();
+		}
+		//请求数据
+		function gotonews() {
+			$.ajax({
+				type : "get",
+				url : "http://api.dagoogle.cn/news/nlist?cid=" + newsid
+						+ "&page=" + ymid + "&psize=" + count,
+				dataType : "jsonp",
+				jsonp : "callback",
+				success : function(date) {
+					//alert(date)
+					//将list中数组的新闻转为json
+					var s = JSON.stringify(date.data.list);
+					//alert(s);
+					$.post("newszxSt", {
+						"jsonp" : s,
+						"newsid" : newsid
+					}, function(da) {
+						if (da === 1) {
+							alert("数据请求成功！");
+						} else if (da === 0) {
+							alert("数据请求失败!");
+						} else {
+							alert("数据已更新" + da + "条！");
+						}
+					}, "json");
+					//错误回调函数
+				},
+				error : function(e) {
+					console.log(e);
+				}
+			});
+		}
+	</script>
+</body>
+
+<select id="one" onchange="news()">
+	<option selected="selected" value="请选择">请选择新闻分类</option>
+	<option value="1">娱乐</option>
+	<option value="2">军事</option>
+	<option value="3">汽车</option>
+	<option value="4">财经</option>
+	<option value="6">体育</option>
+	<option value="7">科技</option>
+	<option value="9">头条</option>
+</select>
+
+<select onchange="ym()" id="tow">
+	<option selected="selected" value="请选择">请选择新闻页码</option>
+	<option value="1">第一页</option>
+	<option value="2">第二页</option>
+	<option value="3">第三页</option>
+	<option value="4">第四页</option>
+	<option value="5">第五页</option>
+	<option value="6">第六页</option>
+	<option value="7">第七页</option>
+	<option value="8">第八页</option>
+	<option value="9">第九页</option>
+	<option value="10">第十页</option>
+</select>
+
+
+
+
+<select onchange="ts()" id="three">
+	<option selected="selected" value="请选择">请选择新闻条数</option>
+	<option value="1">一条</option>
+	<option value="5">五条</option>
+	<option value="10">十条</option>
+	<option value="15">十五条</option>
+	<option value="20">二十条</option>
+</select>
+
+<input type="button" value="请求数据" onclick="gotonews()" />
+
+
+</html>
